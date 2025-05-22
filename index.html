@@ -1,252 +1,276 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>LG 智慧顯示器銷售體驗</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
-    * {
-      box-sizing: border-box;
-    }
-    html, body {
-      margin: 0; padding: 0;
-      font-family: 'Noto Sans TC', sans-serif;
-      background: radial-gradient(circle, #00182e 0%, #000814 100%);
-      color: #fff;
-      text-align: center;
-    }
+<meta charset="UTF-8" />
+<title>LG 遙控器黑白棋體驗</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
 
-    /* 開場動畫 */
-    #intro {
-      position: fixed;
-      width: 100%; height: 100%;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: spotlightFade 9s ease forwards;
-    }
-    #intro h1 {
-      font-size: 72px;
-      color: #A50034;
-      animation: shrinkText 9s ease forwards;
-      text-shadow: 0 0 30px #A50034;
-    }
-    @keyframes shrinkText {
-      0% { font-size: 72px; }
-      100% { font-size: 28px; opacity: 0; }
-    }
-    @keyframes spotlightFade {
-      0% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { opacity: 0; display: none; visibility: hidden; }
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    text-align: center;
+    overflow: hidden;
+  }
 
-    body::before, body::after {
-      content: "";
-      position: fixed;
-      top: 0; bottom: 0;
-      width: 50%;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.95) 100%);
-      z-index: -1;
-    }
-    body::before {
-      left: 0;
-    }
-    body::after {
-      right: 0;
-    }
+  /* 開場動畫 */
+  #intro {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeOut 1s ease-out 8s forwards;
+  }
 
-    h2 {
-      margin: 20px 0 10px;
-      font-size: 32px;
-      text-shadow: 0 0 8px #00c6ff;
-    }
-    #info, #score {
-      font-size: 18px;
-      text-shadow: 0 0 6px #00c6ff;
-    }
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      box-shadow: 0 0 20px rgba(0,198,255,0.6);
-    }
-    td {
-      width: 90px; height: 90px;
-      border: 1px solid #00c6ff;
-      background: #002f4b;
-      position: relative;
-      vertical-align: top;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    td:hover {
-      background: #004a80;
-    }
-    .task-text {
-      font-size: 14px;
-      color: #a3f1ff;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 5px;
-    }
-    .black, .white {
-      width: 60px; height: 60px;
-      position: absolute;
-      top: 15px; left: 15px;
-      border-radius: 50%;
-      animation: dropPiece 0.4s ease;
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
-    }
-    .black {
-      background: radial-gradient(circle at 30% 30%, #222, #000);
-      box-shadow: 0 0 20px #00c6ff;
-    }
-    .white {
-      background: radial-gradient(circle at 30% 30%, #fff, #ccc);
-      box-shadow: 0 0 20px #a3f1ff;
-    }
-    @keyframes dropPiece {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+  #intro h1 {
+    color: #A50034;
+    font-size: 80px;
+    text-shadow: 0 0 20px #A50034;
+    animation: zoomShrink 9s ease forwards;
+  }
 
-    /* 勝利閃光 */
-    #victory-flash {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
-      animation: flash 1s ease;
-      z-index: 8888;
-    }
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0; display: none; }
-    }
-  </style>
+  @keyframes zoomShrink {
+    0% { transform: scale(1.6); opacity: 0; }
+    10% { opacity: 1; }
+    80% { transform: scale(0.9); }
+    100% { transform: scale(0.5); opacity: 0; }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; visibility: hidden; }
+  }
+
+  /* 探照燈遮罩 */
+  #intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, #000 48%, transparent 50%, #000 52%);
+    opacity: 0.3;
+    animation: sweep 2s infinite alternate ease-in-out;
+    pointer-events: none;
+  }
+
+  @keyframes sweep {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(50%); }
+  }
+
+  h2 {
+    margin: 20px 0 5px;
+    text-shadow: 0 0 8px #00c6ff;
+  }
+
+  #board {
+    margin: 20px auto;
+    border-collapse: collapse;
+    box-shadow: 0 0 15px rgba(0,198,255,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  td {
+    width: 90px; height: 90px;
+    border: 1px solid #00c6ff;
+    vertical-align: top;
+    position: relative;
+    background: #004170;
+    transition: background 0.3s ease;
+    cursor: pointer;
+  }
+
+  td:hover { background: #006bb3; }
+
+  .black, .white {
+    border-radius: 50%;
+    width: 60px; height: 60px;
+    position: absolute;
+    top: 15px; left: 15px;
+    animation: popIn 0.3s ease forwards;
+  }
+
+  .black {
+    background: radial-gradient(circle at center, #111 0%, #222 100%);
+    box-shadow: 0 0 15px #00c6ff;
+  }
+
+  .white {
+    background: radial-gradient(circle at center, #eee 0%, #ccc 100%);
+    box-shadow: 0 0 15px #a3f1ff;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  .task-text {
+    font-size: 16px;
+    color: #a3f1ff;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 5px;
+    line-height: 1.2;
+  }
+
+  #info, #score {
+    font-size: 20px;
+    margin: 10px 0;
+    text-shadow: 0 0 6px #00c6ff;
+  }
+
+  #footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #8fdfff;
+  }
+
+  /* 勝利閃光 */
+  .flash-win {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    animation: flash 0.6s ease-out forwards;
+    z-index: 9998;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+  }
+</style>
 </head>
 <body>
-  <div id="intro">
-    <h1>歡迎來到~LG</h1>
-  </div>
-  <div id="victory-flash"></div>
 
-  <h2>LG 智慧顯示器銷售體驗</h2>
-  <div id="info">玩家 <strong>黑棋</strong> 先手，請點擊空格下棋</div>
-  <div id="score">分數 - 黑棋：0 | 白棋：0</div>
-  <table id="board"></table>
+<div id="intro"><h1>歡迎來到 LG</h1></div>
 
-  <script>
-    const size = 5;
-    const board = [];
-    let currentPlayer = 'black';
-    let scores = { black: 0, white: 0 };
-    const tasks = [
-      ["語音搜尋示範", "滑鼠操作示範", "快速切換App", "遙控熱鍵介紹", "回應複雜疑慮"],
-      ["調整音量示範", "分享語音助理", "模擬疑問回應", "設定YouTube快捷", "遙控適合長輩"],
-      ["首頁快速返回", "遙控器賣點", "模擬銷售話術", "說明便利性", "滑鼠指標省時"],
-      ["找到Netflix影片", "疑慮處理示範", "語音控制畫質", "截圖功能演示", "設定便利功能"],
-      ["快捷鍵設定", "售後問答示範", "喜歡功能分享", "省電設計介紹", "說服顧客購買"]
-    ];
+<h2>LG 遙控器黑白棋任務體驗</h2>
+<div id="info">玩家 <strong>黑棋</strong> 先手，請點擊空格下棋</div>
+<div id="score">分數 - 黑棋：0 | 白棋：0</div>
+<table id="board"></table>
+<div id="footer">提示：點擊格子下棋，完成任務得分！</div>
 
-    function createBoard() {
-      const table = document.getElementById('board');
-      for (let i = 0; i < size; i++) {
-        board[i] = [];
-        const row = document.createElement('tr');
-        for (let j = 0; j < size; j++) {
-          board[i][j] = null;
-          const cell = document.createElement('td');
-          cell.dataset.x = i;
-          cell.dataset.y = j;
-          cell.onclick = onCellClick;
+<script>
+const size = 5;
+const board = [];
+let currentPlayer = 'black';
+let scores = { black: 0, white: 0 };
 
-          const text = document.createElement('div');
-          text.className = 'task-text';
-          text.textContent = tasks[i][j];
-          cell.appendChild(text);
+const tasks = [
+  ["語音搜尋示範", "滑鼠操作示範", "快速切換App", "遙控熱鍵介紹", "回應複雜疑慮"],
+  ["調整音量示範", "分享語音助理", "模擬疑問回應", "設定YouTube快捷", "遙控適合長輩"],
+  ["首頁快速返回", "遙控器賣點", "模擬銷售話術", "說明便利性", "滑鼠指標省時"],
+  ["找到Netflix影片", "疑慮處理示範", "語音控制畫質", "截圖功能演示", "設定便利功能"],
+  ["快捷鍵設定", "售後問答示範", "喜歡功能分享", "省電設計介紹", "說服顧客購買"]
+];
 
-          row.appendChild(cell);
-        }
-        table.appendChild(row);
-      }
+function createBoard(){
+  const table = document.getElementById('board');
+  for(let i=0; i<size; i++){
+    board[i] = [];
+    const row = document.createElement('tr');
+    for(let j=0; j<size; j++){
+      board[i][j] = null;
+      const cell = document.createElement('td');
+      cell.dataset.x = i;
+      cell.dataset.y = j;
+      cell.onclick = onCellClick;
+      const text = document.createElement('div');
+      text.className = 'task-text';
+      text.textContent = tasks[i][j];
+      cell.appendChild(text);
+      row.appendChild(cell);
     }
+    table.appendChild(row);
+  }
+}
 
-    function onCellClick(e) {
-      const x = parseInt(e.currentTarget.dataset.x);
-      const y = parseInt(e.currentTarget.dataset.y);
-      if (board[x][y]) return;
-      placePiece(x, y);
+function onCellClick(e){
+  const x = +e.currentTarget.dataset.x;
+  const y = +e.currentTarget.dataset.y;
+  if(board[x][y]) return alert("這格已被下過！");
+  placePiece(x, y);
+}
+
+function placePiece(x, y){
+  board[x][y] = currentPlayer;
+  const cell = document.querySelector(`td[data-x="${x}"][data-y="${y}"]`);
+  const piece = document.createElement('div');
+  piece.className = currentPlayer;
+  cell.appendChild(piece);
+
+  const flipped = flipPieces(x, y);
+  scores[currentPlayer] += 1 + flipped * 2;
+  updateScore();
+
+  togglePlayer();
+  updateInfo();
+
+  checkVictory();
+}
+
+function flipPieces(x, y){
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]];
+  const opp = currentPlayer === 'black' ? 'white' : 'black';
+  let count = 0;
+
+  dirs.forEach(([dx,dy]) => {
+    const toFlip = [];
+    let nx = x + dx, ny = y + dy;
+    while(nx>=0 && ny>=0 && nx<size && ny<size && board[nx][ny] === opp){
+      toFlip.push([nx,ny]);
+      nx += dx; ny += dy;
     }
-
-    function placePiece(x, y) {
-      board[x][y] = currentPlayer;
-      const cell = document.querySelector(`td[data-x="${x}"][data-y="${y}"]`);
-      const piece = document.createElement('div');
-      piece.className = currentPlayer;
-      cell.appendChild(piece);
-
-      const flipped = flipPieces(x, y);
-      scores[currentPlayer] += 1 + flipped * 2;
-      updateScore();
-
-      if (checkVictory()) {
-        document.getElementById('victory-flash').style.display = 'block';
-        setTimeout(() => {
-          document.getElementById('victory-flash').style.display = 'none';
-        }, 1000);
-      }
-
-      currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
-      updateInfo();
-    }
-
-    const directions = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
-
-    function flipPieces(x, y) {
-      const opp = currentPlayer === 'black' ? 'white' : 'black';
-      let total = 0;
-      directions.forEach(([dx,dy]) => {
-        let nx = x + dx, ny = y + dy;
-        const flips = [];
-        while(nx >= 0 && nx < size && ny >= 0 && ny < size && board[nx][ny] === opp) {
-          flips.push([nx,ny]);
-          nx += dx; ny += dy;
-        }
-        if (nx >=0 && nx<size && ny>=0 && ny<size && board[nx][ny] === currentPlayer) {
-          flips.forEach(([fx,fy]) => {
-            board[fx][fy] = currentPlayer;
-            const cell = document.querySelector(`td[data-x="${fx}"][data-y="${fy}"]`);
-            cell.querySelectorAll('.black, .white').forEach(p => p.remove());
-            const newP = document.createElement('div');
-            newP.className = currentPlayer;
-            cell.appendChild(newP);
-          });
-          total += flips.length;
-        }
+    if(nx>=0 && ny>=0 && nx<size && ny<size && board[nx][ny] === currentPlayer){
+      toFlip.forEach(([fx,fy]) => {
+        board[fx][fy] = currentPlayer;
+        const cell = document.querySelector(`td[data-x="${fx}"][data-y="${fy}"]`);
+        cell.querySelector('.black, .white')?.remove();
+        const flipped = document.createElement('div');
+        flipped.className = currentPlayer;
+        cell.appendChild(flipped);
       });
-      return total;
+      count += toFlip.length;
     }
+  });
 
-    function checkVictory() {
-      return scores.black + scores.white >= size * size;
-    }
+  return count;
+}
 
-    function updateInfo() {
-      document.getElementById('info').innerHTML = `輪到玩家 <strong>${currentPlayer === 'black' ? '黑棋' : '白棋'}</strong> 下棋`;
-    }
-    function updateScore() {
-      document.getElementById('score').textContent = `分數 - 黑棋：${scores.black} | 白棋：${scores.white}`;
-    }
+function togglePlayer(){
+  currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+}
 
-    createBoard();
-    updateInfo();
-    updateScore();
-  </script>
+function updateInfo(){
+  document.getElementById('info').innerHTML = `輪到玩家 <strong>${currentPlayer === 'black' ? '黑棋' : '白棋'}</strong> 下棋`;
+}
+
+function updateScore(){
+  document.getElementById('score').textContent = `分數 - 黑棋：${scores.black} | 白棋：${scores.white}`;
+}
+
+function checkVictory(){
+  if([...board.flat()].filter(Boolean).length === size*size){
+    const winner = scores.black > scores.white ? '黑棋' : '白棋';
+    document.body.appendChild(Object.assign(document.createElement('div'), {
+      className: 'flash-win'
+    }));
+    setTimeout(() => alert(`${winner} 勝利！`), 600);
+  }
+}
+
+createBoard();
+updateInfo();
+updateScore();
+</script>
 </body>
 </html>
