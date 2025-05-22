@@ -2,117 +2,251 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>LG 銷售黑白棋</title>
+  <title>LG 智慧顯示器銷售體驗</title>
   <style>
-    body {
-      font-family: "Arial", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #f5f5f5;
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
+    * {
+      box-sizing: border-box;
     }
-
-    h1 {
-      margin-top: 20px;
-      color: #333;
-    }
-
-    #board {
-      display: grid;
-      grid-template-columns: repeat(5, 120px);
-      grid-template-rows: repeat(5, 120px);
-      gap: 5px;
-      margin-top: 30px;
-    }
-
-    .cell {
-      width: 120px;
-      height: 120px;
-      background-color: #fff;
-      border: 2px solid #999;
+    html, body {
+      margin: 0; padding: 0;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle, #00182e 0%, #000814 100%);
+      color: #fff;
       text-align: center;
-      vertical-align: middle;
-      font-size: 20px;
+    }
+
+    /* 開場動畫 */
+    #intro {
+      position: fixed;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spotlightFade 9s ease forwards;
+    }
+    #intro h1 {
+      font-size: 72px;
+      color: #A50034;
+      animation: shrinkText 9s ease forwards;
+      text-shadow: 0 0 30px #A50034;
+    }
+    @keyframes shrinkText {
+      0% { font-size: 72px; }
+      100% { font-size: 28px; opacity: 0; }
+    }
+    @keyframes spotlightFade {
+      0% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; display: none; visibility: hidden; }
+    }
+
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      top: 0; bottom: 0;
+      width: 50%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.95) 100%);
+      z-index: -1;
+    }
+    body::before {
+      left: 0;
+    }
+    body::after {
+      right: 0;
+    }
+
+    h2 {
+      margin: 20px 0 10px;
+      font-size: 32px;
+      text-shadow: 0 0 8px #00c6ff;
+    }
+    #info, #score {
+      font-size: 18px;
+      text-shadow: 0 0 6px #00c6ff;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      box-shadow: 0 0 20px rgba(0,198,255,0.6);
+    }
+    td {
+      width: 90px; height: 90px;
+      border: 1px solid #00c6ff;
+      background: #002f4b;
+      position: relative;
+      vertical-align: top;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    td:hover {
+      background: #004a80;
+    }
+    .task-text {
+      font-size: 14px;
+      color: #a3f1ff;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
-      position: relative;
-      transition: background-color 0.2s ease;
+      text-align: center;
+      padding: 5px;
     }
-
-    .cell:hover {
-      background-color: #eee;
-    }
-
-    .black::after, .white::after {
-      content: "";
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .black, .white {
+      width: 60px; height: 60px;
       position: absolute;
+      top: 15px; left: 15px;
+      border-radius: 50%;
+      animation: dropPiece 0.4s ease;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+    .black {
+      background: radial-gradient(circle at 30% 30%, #222, #000);
+      box-shadow: 0 0 20px #00c6ff;
+    }
+    .white {
+      background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+      box-shadow: 0 0 20px #a3f1ff;
+    }
+    @keyframes dropPiece {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
-    .black::after {
-      background-color: black;
+    /* 勝利閃光 */
+    #victory-flash {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+      animation: flash 1s ease;
+      z-index: 8888;
     }
-
-    .white::after {
-      background-color: white;
-      border: 2px solid #000;
+    @keyframes flash {
+      0% { opacity: 1; }
+      100% { opacity: 0; display: none; }
     }
   </style>
 </head>
 <body>
-  <h1>LG 銷售黑白棋</h1>
-  <div id="board"></div>
+  <div id="intro">
+    <h1>歡迎來到~LG</h1>
+  </div>
+  <div id="victory-flash"></div>
+
+  <h2>LG 智慧顯示器銷售體驗</h2>
+  <div id="info">玩家 <strong>黑棋</strong> 先手，請點擊空格下棋</div>
+  <div id="score">分數 - 黑棋：0 | 白棋：0</div>
+  <table id="board"></table>
 
   <script>
-    const questions = [
-      "請說明Magic Remote的滾輪功能",
-      "示範如何快速切換訊號源",
-      "讓客人試試語音搜尋Netflix",
-      "比較OLED與QNED的差異",
-      "介紹OLED的像素自發光",
-      "讓客人試試快捷鍵功能",
-      "請找出遙控器的設定鍵",
-      "講解ThinQ AI的語音指令應用",
-      "請問如何啟動無線螢幕分享",
-      "展示如何調整影像模式",
-      "讓客戶用語音改變音量",
-      "解釋什麼是Filmmaker模式",
-      "講解AI亮度調整功能",
-      "介紹Art Gallery模式",
-      "展示M4如何無線連接音響",
-      "比較傳統遙控器與Magic Remote",
-      "請展示遊戲模式開啟",
-      "怎麼調整畫面比例？",
-      "聲控搜尋YouTube上的食譜",
-      "用遙控器找到設定中的網路",
-      "示範電視與手機連動",
-      "如何聲控關閉電視",
-      "展示遙控器指標滑動流暢度",
-      "聲控打開Disney+",
-      "介紹透明OLED的應用場景"
+    const size = 5;
+    const board = [];
+    let currentPlayer = 'black';
+    let scores = { black: 0, white: 0 };
+    const tasks = [
+      ["語音搜尋示範", "滑鼠操作示範", "快速切換App", "遙控熱鍵介紹", "回應複雜疑慮"],
+      ["調整音量示範", "分享語音助理", "模擬疑問回應", "設定YouTube快捷", "遙控適合長輩"],
+      ["首頁快速返回", "遙控器賣點", "模擬銷售話術", "說明便利性", "滑鼠指標省時"],
+      ["找到Netflix影片", "疑慮處理示範", "語音控制畫質", "截圖功能演示", "設定便利功能"],
+      ["快捷鍵設定", "售後問答示範", "喜歡功能分享", "省電設計介紹", "說服顧客購買"]
     ];
 
-    const board = document.getElementById("board");
-    let turn = "black";
+    function createBoard() {
+      const table = document.getElementById('board');
+      for (let i = 0; i < size; i++) {
+        board[i] = [];
+        const row = document.createElement('tr');
+        for (let j = 0; j < size; j++) {
+          board[i][j] = null;
+          const cell = document.createElement('td');
+          cell.dataset.x = i;
+          cell.dataset.y = j;
+          cell.onclick = onCellClick;
 
-    const shuffled = questions.sort(() => 0.5 - Math.random());
+          const text = document.createElement('div');
+          text.className = 'task-text';
+          text.textContent = tasks[i][j];
+          cell.appendChild(text);
 
-    for (let i = 0; i < 25; i++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.innerText = shuffled[i];
-      cell.addEventListener("click", function () {
-        if (!cell.classList.contains("black") && !cell.classList.contains("white")) {
-          cell.classList.add(turn);
-          turn = turn === "black" ? "white" : "black";
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+    }
+
+    function onCellClick(e) {
+      const x = parseInt(e.currentTarget.dataset.x);
+      const y = parseInt(e.currentTarget.dataset.y);
+      if (board[x][y]) return;
+      placePiece(x, y);
+    }
+
+    function placePiece(x, y) {
+      board[x][y] = currentPlayer;
+      const cell = document.querySelector(`td[data-x="${x}"][data-y="${y}"]`);
+      const piece = document.createElement('div');
+      piece.className = currentPlayer;
+      cell.appendChild(piece);
+
+      const flipped = flipPieces(x, y);
+      scores[currentPlayer] += 1 + flipped * 2;
+      updateScore();
+
+      if (checkVictory()) {
+        document.getElementById('victory-flash').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('victory-flash').style.display = 'none';
+        }, 1000);
+      }
+
+      currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+      updateInfo();
+    }
+
+    const directions = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+
+    function flipPieces(x, y) {
+      const opp = currentPlayer === 'black' ? 'white' : 'black';
+      let total = 0;
+      directions.forEach(([dx,dy]) => {
+        let nx = x + dx, ny = y + dy;
+        const flips = [];
+        while(nx >= 0 && nx < size && ny >= 0 && ny < size && board[nx][ny] === opp) {
+          flips.push([nx,ny]);
+          nx += dx; ny += dy;
+        }
+        if (nx >=0 && nx<size && ny>=0 && ny<size && board[nx][ny] === currentPlayer) {
+          flips.forEach(([fx,fy]) => {
+            board[fx][fy] = currentPlayer;
+            const cell = document.querySelector(`td[data-x="${fx}"][data-y="${fy}"]`);
+            cell.querySelectorAll('.black, .white').forEach(p => p.remove());
+            const newP = document.createElement('div');
+            newP.className = currentPlayer;
+            cell.appendChild(newP);
+          });
+          total += flips.length;
         }
       });
-      board.appendChild(cell);
+      return total;
     }
+
+    function checkVictory() {
+      return scores.black + scores.white >= size * size;
+    }
+
+    function updateInfo() {
+      document.getElementById('info').innerHTML = `輪到玩家 <strong>${currentPlayer === 'black' ? '黑棋' : '白棋'}</strong> 下棋`;
+    }
+    function updateScore() {
+      document.getElementById('score').textContent = `分數 - 黑棋：${scores.black} | 白棋：${scores.white}`;
+    }
+
+    createBoard();
+    updateInfo();
+    updateScore();
   </script>
 </body>
 </html>
