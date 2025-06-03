@@ -1,276 +1,203 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<title>LG 遙控器黑白棋體驗</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: #fff;
-    text-align: center;
-    overflow: hidden;
-  }
-
-  /* 開場動畫 */
-  #intro {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: fadeOut 1s ease-out 8s forwards;
-  }
-
-  #intro h1 {
-    color: #A50034;
-    font-size: 80px;
-    text-shadow: 0 0 20px #A50034;
-    animation: zoomShrink 9s ease forwards;
-  }
-
-  @keyframes zoomShrink {
-    0% { transform: scale(1.6); opacity: 0; }
-    10% { opacity: 1; }
-    80% { transform: scale(0.9); }
-    100% { transform: scale(0.5); opacity: 0; }
-  }
-
-  @keyframes fadeOut {
-    to { opacity: 0; visibility: hidden; }
-  }
-
-  /* 探照燈遮罩 */
-  #intro::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to right, #000 48%, transparent 50%, #000 52%);
-    opacity: 0.3;
-    animation: sweep 2s infinite alternate ease-in-out;
-    pointer-events: none;
-  }
-
-  @keyframes sweep {
-    0% { transform: translateX(-50%); }
-    100% { transform: translateX(50%); }
-  }
-
-  h2 {
-    margin: 20px 0 5px;
-    text-shadow: 0 0 8px #00c6ff;
-  }
-
-  #board {
-    margin: 20px auto;
-    border-collapse: collapse;
-    box-shadow: 0 0 15px rgba(0,198,255,0.5);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  td {
-    width: 90px; height: 90px;
-    border: 1px solid #00c6ff;
-    vertical-align: top;
-    position: relative;
-    background: #004170;
-    transition: background 0.3s ease;
-    cursor: pointer;
-  }
-
-  td:hover { background: #006bb3; }
-
-  .black, .white {
-    border-radius: 50%;
-    width: 60px; height: 60px;
-    position: absolute;
-    top: 15px; left: 15px;
-    animation: popIn 0.3s ease forwards;
-  }
-
-  .black {
-    background: radial-gradient(circle at center, #111 0%, #222 100%);
-    box-shadow: 0 0 15px #00c6ff;
-  }
-
-  .white {
-    background: radial-gradient(circle at center, #eee 0%, #ccc 100%);
-    box-shadow: 0 0 15px #a3f1ff;
-  }
-
-  @keyframes popIn {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
-  }
-
-  .task-text {
-    font-size: 16px;
-    color: #a3f1ff;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 5px;
-    line-height: 1.2;
-  }
-
-  #info, #score {
-    font-size: 20px;
-    margin: 10px 0;
-    text-shadow: 0 0 6px #00c6ff;
-  }
-
-  #footer {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #8fdfff;
-  }
-
-  /* 勝利閃光 */
-  .flash-win {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,255,255,0.9);
-    animation: flash 0.6s ease-out forwards;
-    z-index: 9998;
-  }
-
-  @keyframes flash {
-    0% { opacity: 0; }
-    50% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>LG TV知識小考驗</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #000;
+      color: #fff;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    .team-red { color: #e53935; }
+    .team-green { color: #43a047; }
+    .turn-indicator {
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 30px auto;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      background: #444;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.2s;
+      color: transparent;
+    }
+    .cell.locked {
+      background: #222;
+      pointer-events: none;
+      text-decoration: line-through;
+    }
+    .cell.red {
+      background: #e53935;
+      color: white;
+    }
+    .cell.green {
+      background: #43a047;
+      color: white;
+    }
+    .popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      padding: 30px;
+      border-radius: 10px;
+      border: 2px solid #4caf50;
+      display: none;
+      z-index: 1000;
+    }
+    .popup h2 {
+      margin-bottom: 20px;
+    }
+    .popup button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+    .flash {
+      animation: flash 0.4s ease-in-out 3;
+    }
+    @keyframes flash {
+      0%, 100% { transform: scale(1); background-color: #fff; color: #000; }
+      50% { transform: scale(1.2); background-color: gold; color: black; }
+    }
+  </style>
 </head>
 <body>
+  <h1>LG TV知識小考驗</h1>
+  <div class="scoreboard">
+    <div class="team-red">🔴 紅隊：<span id="score-red">0</span> 分</div>
+    <div class="team-green">🟢 綠隊：<span id="score-green">0</span> 分</div>
+  </div>
+  <div class="turn-indicator">目前輪到：<span id="current-team" class="team-red">紅隊</span></div>
+  <div class="board" id="board"></div>
 
-<div id="intro"><h1>歡迎來到 LG</h1></div>
+  <div class="popup" id="popup">
+    <h2 id="taskText">任務內容</h2>
+    <button onclick="completeTask(true)">✅ 成功</button>
+    <button onclick="completeTask(false)">❌ 失敗</button>
+  </div>
 
-<h2>LG 遙控器黑白棋任務體驗</h2>
-<div id="info">玩家 <strong>黑棋</strong> 先手，請點擊空格下棋</div>
-<div id="score">分數 - 黑棋：0 | 白棋：0</div>
-<table id="board"></table>
-<div id="footer">提示：點擊格子下棋，完成任務得分！</div>
+  <script>
+    const board = document.getElementById("board");
+    const popup = document.getElementById("popup");
+    const taskText = document.getElementById("taskText");
+    const scoreRedEl = document.getElementById("score-red");
+    const scoreGreenEl = document.getElementById("score-green");
+    const currentTeamEl = document.getElementById("current-team");
 
-<script>
-const size = 5;
-const board = [];
-let currentPlayer = 'black';
-let scores = { black: 0, white: 0 };
+    let redScore = 0;
+    let greenScore = 0;
+    let currentTeam = "red"; // "red" or "green"
+    let currentCell = null;
 
-const tasks = [
-  ["語音搜尋示範", "滑鼠操作示範", "快速切換App", "遙控熱鍵介紹", "回應複雜疑慮"],
-  ["調整音量示範", "分享語音助理", "模擬疑問回應", "設定YouTube快捷", "遙控適合長輩"],
-  ["首頁快速返回", "遙控器賣點", "模擬銷售話術", "說明便利性", "滑鼠指標省時"],
-  ["找到Netflix影片", "疑慮處理示範", "語音控制畫質", "截圖功能演示", "設定便利功能"],
-  ["快捷鍵設定", "售後問答示範", "喜歡功能分享", "省電設計介紹", "說服顧客購買"]
-];
+    const tasks = [
+      "用微軟copilot安排高雄兩天一夜的旅遊行程",
+      "請說明LG哪些型號有低藍光護眼認證",
+      "請用滑鼠遙控器關閉LG冷氣",
+      "請下載Friday影音",
+      "請將畫面調暗一點",
+      "如何在LG顯示器上登入Google Home產品",
+      "請將LG顯示器的天氣定位設定為現在位置",
+      "簡單說明G5亮度較傳統OLED提升多少？亮度提升有什麼好處",
+      "請說明今年QNED有哪些型號",
+      "今年LG Soundbar有哪些型號",
+      "如何切換為Soundbar音效輸出",
+      "WOW orchestra同步音場功能有什麼好處",
+      "如何重新配對AI智慧滑鼠遙控器",
+      "如果想提升畫面畫質，可以開啟什麼功能、在哪裡開啟",
+      "重視家裡裝潢風格，想找可壁掛有質感，又想要畫質好，可以推薦哪一台，為什麼？",
+      "LG的webOS和他牌系統有什麼優勢，請說明三個"
+    ];
 
-function createBoard(){
-  const table = document.getElementById('board');
-  for(let i=0; i<size; i++){
-    board[i] = [];
-    const row = document.createElement('tr');
-    for(let j=0; j<size; j++){
-      board[i][j] = null;
-      const cell = document.createElement('td');
-      cell.dataset.x = i;
-      cell.dataset.y = j;
-      cell.onclick = onCellClick;
-      const text = document.createElement('div');
-      text.className = 'task-text';
-      text.textContent = tasks[i][j];
-      cell.appendChild(text);
-      row.appendChild(cell);
+    // 打亂題目順序
+    const shuffledTasks = tasks.map((task, index) => ({ task, index }))
+                               .sort(() => Math.random() - 0.5);
+
+    function createBoard() {
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = shuffledTasks[i].index; // 原始題目索引
+        cell.addEventListener("click", () => showTask(cell, shuffledTasks[i].index, shuffledTasks[i].task));
+        board.appendChild(cell);
+      }
     }
-    table.appendChild(row);
-  }
-}
 
-function onCellClick(e){
-  const x = +e.currentTarget.dataset.x;
-  const y = +e.currentTarget.dataset.y;
-  if(board[x][y]) return alert("這格已被下過！");
-  placePiece(x, y);
-}
+    function showTask(cell, index, task) {
+      if (cell.classList.contains("locked") || cell.classList.contains("red") || cell.classList.contains("green")) return;
+      currentCell = cell;
+      taskText.textContent = `任務：${task}`;
+      popup.style.display = "block";
 
-function placePiece(x, y){
-  board[x][y] = currentPlayer;
-  const cell = document.querySelector(`td[data-x="${x}"][data-y="${y}"]`);
-  const piece = document.createElement('div');
-  piece.className = currentPlayer;
-  cell.appendChild(piece);
-
-  const flipped = flipPieces(x, y);
-  scores[currentPlayer] += 1 + flipped * 2;
-  updateScore();
-
-  togglePlayer();
-  updateInfo();
-
-  checkVictory();
-}
-
-function flipPieces(x, y){
-  const dirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]];
-  const opp = currentPlayer === 'black' ? 'white' : 'black';
-  let count = 0;
-
-  dirs.forEach(([dx,dy]) => {
-    const toFlip = [];
-    let nx = x + dx, ny = y + dy;
-    while(nx>=0 && ny>=0 && nx<size && ny<size && board[nx][ny] === opp){
-      toFlip.push([nx,ny]);
-      nx += dx; ny += dy;
+      // 題號15與16特效
+      if (index === 14 || index === 15) {
+        cell.classList.add("flash");
+      }
     }
-    if(nx>=0 && ny>=0 && nx<size && ny<size && board[nx][ny] === currentPlayer){
-      toFlip.forEach(([fx,fy]) => {
-        board[fx][fy] = currentPlayer;
-        const cell = document.querySelector(`td[data-x="${fx}"][data-y="${fy}"]`);
-        cell.querySelector('.black, .white')?.remove();
-        const flipped = document.createElement('div');
-        flipped.className = currentPlayer;
-        cell.appendChild(flipped);
-      });
-      count += toFlip.length;
+
+    function completeTask(success) {
+      popup.style.display = "none";
+      if (!currentCell) return;
+
+      const index = parseInt(currentCell.dataset.index);
+      const isBonus = index === 14 || index === 15;
+      const points = isBonus ? 5 : Math.floor(Math.random() * 3) + 1;
+
+      if (success) {
+        if (currentTeam === "red") {
+          redScore += points;
+          scoreRedEl.textContent = redScore;
+          currentCell.classList.add("red");
+        } else {
+          greenScore += points;
+          scoreGreenEl.textContent = greenScore;
+          currentCell.classList.add("green");
+        }
+        currentCell.textContent = `+${points}`;
+        currentCell.style.color = "white";
+        currentCell.style.pointerEvents = "none";
+      } else {
+        currentCell.classList.add("locked");
+        currentCell.textContent = "X";
+        currentCell.style.color = "white";
+      }
+
+      currentTeam = currentTeam === "red" ? "green" : "red";
+      currentTeamEl.textContent = currentTeam === "red" ? "紅隊" : "綠隊";
+      currentTeamEl.className = currentTeam === "red" ? "team-red" : "team-green";
+
+      currentCell = null;
     }
-  });
 
-  return count;
-}
-
-function togglePlayer(){
-  currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
-}
-
-function updateInfo(){
-  document.getElementById('info').innerHTML = `輪到玩家 <strong>${currentPlayer === 'black' ? '黑棋' : '白棋'}</strong> 下棋`;
-}
-
-function updateScore(){
-  document.getElementById('score').textContent = `分數 - 黑棋：${scores.black} | 白棋：${scores.white}`;
-}
-
-function checkVictory(){
-  if([...board.flat()].filter(Boolean).length === size*size){
-    const winner = scores.black > scores.white ? '黑棋' : '白棋';
-    document.body.appendChild(Object.assign(document.createElement('div'), {
-      className: 'flash-win'
-    }));
-    setTimeout(() => alert(`${winner} 勝利！`), 600);
-  }
-}
-
-createBoard();
-updateInfo();
-updateScore();
-</script>
+    createBoard();
+  </script>
 </body>
 </html>
