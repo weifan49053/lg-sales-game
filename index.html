@@ -1,230 +1,203 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LG消費者需求配對</title>
+  <meta charset="UTF-8">
+  <title>LG TV知識小考驗</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 20px;
+      font-family: "Segoe UI", sans-serif;
+      background: #000;
+      color: #fff;
       text-align: center;
     }
     h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
+      margin-top: 20px;
     }
-    #timer {
-      font-size: 16px;
-      margin: 10px 0;
-    }
-    #history {
-      text-align: left;
-      margin: 10px auto;
-      font-size: 15px;
-      max-width: 400px;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-    .questions {
+    .scoreboard {
       display: flex;
       justify-content: space-around;
+      margin-top: 20px;
+      font-size: 1.2rem;
     }
-    .question-box {
-      background: #fff;
-      border-radius: 10px;
-      border: 3px solid transparent;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      width: 30%;
-      padding: 16px;
-      min-height: 160px;
-      font-size: 18px;
-      transition: border-color 0.2s;
-    }
-    .question-box.selected {
-      border-color: #2ecc71;
-      background-color: #f0fff4;
-    }
-    .answers {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-    .answer {
-      background: #ffffff;
-      border-radius: 6px;
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      border: 2px solid #ccc;
-      transition: all 0.2s ease;
-    }
-    .answer:hover {
-      background: #f0f8ff;
-      border-color: #3498db;
-    }
-    .answer.used {
-      background: #ddd;
-      color: #999;
-      cursor: default;
-      pointer-events: none;
-    }
-    .matched-answers {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #555;
-    }
-    button {
+    .team-red { color: #e53935; }
+    .team-green { color: #43a047; }
+    .turn-indicator {
       margin-top: 10px;
-      padding: 6px 12px;
-      font-size: 14px;
-      background: #27ae60;
+      font-size: 1rem;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 30px auto;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      background: #444;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.2s;
+      color: transparent;
+    }
+    .cell.locked {
+      background: #222;
+      pointer-events: none;
+      text-decoration: line-through;
+    }
+    .cell.red {
+      background: #e53935;
       color: white;
-      border: none;
-      border-radius: 6px;
+    }
+    .cell.green {
+      background: #43a047;
+      color: white;
+    }
+    .popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      padding: 30px;
+      border-radius: 10px;
+      border: 2px solid #4caf50;
+      display: none;
+      z-index: 1000;
+    }
+    .popup h2 {
+      margin-bottom: 20px;
+    }
+    .popup button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #4caf50;
+      color: white;
       cursor: pointer;
     }
-    button:hover {
-      background: #219150;
+    .flash {
+      animation: flash 0.4s ease-in-out 3;
+    }
+    @keyframes flash {
+      0%, 100% { transform: scale(1); background-color: #fff; color: #000; }
+      50% { transform: scale(1.2); background-color: gold; color: black; }
     }
   </style>
 </head>
 <body>
-  <h1>LG 消費者需求配對</h1>
-  <div id="timer">花費時間：<span id="time">0</span> 秒</div>
-  <div id="history">
-    <strong>近五次紀錄：</strong>
-    <ul id="records" style="padding-left: 20px; margin-top: 6px;"></ul>
+  <h1>LG TV知識小考驗</h1>
+  <div class="scoreboard">
+    <div class="team-red">🔴 紅隊：<span id="score-red">0</span> 分</div>
+    <div class="team-green">🟢 綠隊：<span id="score-green">0</span> 分</div>
   </div>
-  <div class="container">
-    <div class="questions" id="questions"></div>
-    <div class="answers" id="answers"></div>
-    <button onclick="submit()">送出配對</button>
+  <div class="turn-indicator">目前輪到：<span id="current-team" class="team-red">紅隊</span></div>
+  <div class="board" id="board"></div>
+
+  <div class="popup" id="popup">
+    <h2 id="taskText">任務內容</h2>
+    <button onclick="completeTask(true)">✅ 成功</button>
+    <button onclick="completeTask(false)">❌ 失敗</button>
   </div>
 
   <script>
-    const allData = [
-      ["我平常喜歡追劇看電影，希望畫面漂亮、聲音有臨場感。", ["AI影像", "AI音效"]],
-      ["沒有用過智慧電視，怕操作很困難。", ["AI智慧滑鼠遙控器", "LG webOS"]],
-      ["重視家裡裝潢風格，牆面也無法再挖洞藏線，想找能壁掛安裝有質感，又不想要有一堆線材設備的電視。", ["零間隙壁掛", "真無線影音傳輸技術"]],
-      ["有沒有那種能連手機的？拍的照片影片都想用大螢幕來看。", ["Airplay", "Chromecast"]],
-      ["我只想買一台操作方便'、系統穩定的電視", ["LG webOS", "AI智慧滑鼠遙控器"]],
-      ["剛搬新家，希望電視是那種看起來很有質感的。", ["零間隙壁掛", "OLED超薄機身"]],
-      ["我覺得LG電視畫質很不錯，但又想要更有環繞感的音效體驗", ["AI音效", "LG Soundbar"]],
-      ["電視能像手機一樣用語音控制嗎？", ["AI智慧語音搜尋", "AI智慧滑鼠遙控器"]],
-      ["家裡有長輩小孩，比較注重護眼相關的功能", ["OLED低藍光護眼認證", "OLED不閃爍認證"]],
-      ["我都看YouTube，能不能直接講話叫出來，不要一層一層找。", ["AI智慧語音搜尋", "AI智慧滑鼠遙控器"]],
-      ["以前買電視過1~2年就沒辦法更新，現在能像手機一直更新嗎？", ["軟體五年更新保證", "LG webOS"]],
-      ["喜歡打電動，有支援遊戲規格嗎?", ["G-sync", "Freesync"]],
-      ["有時只是想放空，打開電視能不能主動推薦我一些內容", ["AI歡迎模式", "AI個人化推薦"]],
-      ["是爸媽要看第四台的，遙控器能不能不用那麼多支，簡單一點", ["機上盒整合功能", "AI智慧滑鼠遙控器"]],
-      ["冷氣跟洗衣機都是LG的，能不能用電視整合在一起，應該會更方便吧？", ["支援ThinQ", "居家中心功能"]]
+    const board = document.getElementById("board");
+    const popup = document.getElementById("popup");
+    const taskText = document.getElementById("taskText");
+    const scoreRedEl = document.getElementById("score-red");
+    const scoreGreenEl = document.getElementById("score-green");
+    const currentTeamEl = document.getElementById("current-team");
+
+    let redScore = 0;
+    let greenScore = 0;
+    let currentTeam = "red"; // "red" or "green"
+    let currentCell = null;
+
+    const tasks = [
+      "用微軟copilot安排高雄兩天一夜的旅遊行程",
+      "請說明LG哪些型號有低藍光護眼認證",
+      "請用滑鼠遙控器關閉LG冷氣",
+      "請下載Friday影音",
+      "請將畫面調暗一點",
+      "如何在LG顯示器上登入Google Home產品",
+      "請將LG顯示器的天氣定位設定為現在位置",
+      "簡單說明G5亮度較傳統OLED提升多少？亮度提升有什麼好處",
+      "請說明今年QNED有哪些型號",
+      "今年LG Soundbar有哪些型號",
+      "如何切換為Soundbar音效輸出",
+      "WOW orchestra同步音場功能有什麼好處",
+      "如何重新配對AI智慧滑鼠遙控器",
+      "如果想提升畫面畫質，可以開啟什麼功能、在哪裡開啟",
+      "重視家裡裝潢風格，想找可壁掛有質感，又想要畫質好，可以推薦哪一台，為什麼？",
+      "LG的webOS和他牌系統有什麼優勢，請說明三個"
     ];
 
-    let selectedBox = null;
-    let matchMap = new Map();
-    let startTime = Date.now();
-    let timer = setInterval(() => {
-      document.getElementById("time").textContent = Math.floor((Date.now() - startTime) / 1000);
-    }, 1000);
-    let last5Times = [];
+    // 打亂題目順序
+    const shuffledTasks = tasks.map((task, index) => ({ task, index }))
+                               .sort(() => Math.random() - 0.5);
 
-    function shuffle(arr) {
-      return [...arr].sort(() => Math.random() - 0.5);
+    function createBoard() {
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = shuffledTasks[i].index; // 原始題目索引
+        cell.addEventListener("click", () => showTask(cell, shuffledTasks[i].index, shuffledTasks[i].task));
+        board.appendChild(cell);
+      }
     }
 
-    function initGame() {
-      const selected = shuffle(allData).slice(0, 3);
-      const allAnswers = [...new Set(selected.flatMap(d => d[1]))];
-      const qWrap = document.getElementById("questions");
-      const aWrap = document.getElementById("answers");
-      qWrap.innerHTML = "";
-      aWrap.innerHTML = "";
-      matchMap.clear();
+    function showTask(cell, index, task) {
+      if (cell.classList.contains("locked") || cell.classList.contains("red") || cell.classList.contains("green")) return;
+      currentCell = cell;
+      taskText.textContent = `任務：${task}`;
+      popup.style.display = "block";
 
-      selected.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "question-box";
-        div.innerHTML = `<div>${item[0]}</div><div class="matched-answers" id="matched-${index}"></div>`;
-        div.onclick = () => {
-          document.querySelectorAll('.question-box').forEach(e => e.classList.remove('selected'));
-          selectedBox = index;
-          div.classList.add("selected");
-        };
-        qWrap.appendChild(div);
-      });
-
-      shuffle(allAnswers).forEach(text => {
-        const ans = document.createElement("div");
-        ans.className = "answer";
-        ans.textContent = text;
-        ans.onclick = () => {
-          if (selectedBox === null) return;
-          const matchedList = matchMap.get(selectedBox) || [];
-          if (matchedList.length >= 2) return;
-          matchedList.push(text);
-          matchMap.set(selectedBox, matchedList);
-          document.getElementById("matched-" + selectedBox).textContent = matchedList.join("、");
-          ans.classList.add("used");
-          selectedBox = null;
-          document.querySelectorAll('.question-box').forEach(e => e.classList.remove('selected'));
-        };
-        aWrap.appendChild(ans);
-      });
-
-      window.currentQuestions = selected;
+      // 題號15與16特效
+      if (index === 14 || index === 15) {
+        cell.classList.add("flash");
+      }
     }
 
-    function submit() {
-      let allCorrect = true;
-      for (let i = 0; i < 3; i++) {
-        const correct = window.currentQuestions[i][1];
-        const selected = matchMap.get(i) || [];
-        const ok = correct.every(ans => selected.includes(ans)) && selected.length === correct.length;
-        if (!ok) {
-          allCorrect = false;
-          break;
+    function completeTask(success) {
+      popup.style.display = "none";
+      if (!currentCell) return;
+
+      const index = parseInt(currentCell.dataset.index);
+      const isBonus = index === 14 || index === 15;
+      const points = isBonus ? 5 : Math.floor(Math.random() * 3) + 1;
+
+      if (success) {
+        if (currentTeam === "red") {
+          redScore += points;
+          scoreRedEl.textContent = redScore;
+          currentCell.classList.add("red");
+        } else {
+          greenScore += points;
+          scoreGreenEl.textContent = greenScore;
+          currentCell.classList.add("green");
         }
-      }
-      if (allCorrect) {
-        const seconds = Math.floor((Date.now() - startTime) / 1000);
-        last5Times.unshift(seconds);
-        if (last5Times.length > 5) last5Times.pop();
-        alert("配對成功！請與顧客 " + (Math.floor(Math.random() * 3) + 1) + " 進行實地銷售演練！");
-        renderHistory();
-        clearInterval(timer);
-        setTimeout(() => {
-          startTime = Date.now();
-          timer = setInterval(() => {
-            document.getElementById("time").textContent = Math.floor((Date.now() - startTime) / 1000);
-          }, 1000);
-          initGame();
-        }, 100);
+        currentCell.textContent = `+${points}`;
+        currentCell.style.color = "white";
+        currentCell.style.pointerEvents = "none";
       } else {
-        alert("有錯誤，請重新配對！");
-        initGame();
+        currentCell.classList.add("locked");
+        currentCell.textContent = "X";
+        currentCell.style.color = "white";
       }
+
+      currentTeam = currentTeam === "red" ? "green" : "red";
+      currentTeamEl.textContent = currentTeam === "red" ? "紅隊" : "綠隊";
+      currentTeamEl.className = currentTeam === "red" ? "team-red" : "team-green";
+
+      currentCell = null;
     }
 
-    function renderHistory() {
-      const ul = document.getElementById("records");
-      ul.innerHTML = "";
-      last5Times.forEach((sec, i) => {
-        const li = document.createElement("li");
-        li.textContent = `第${i + 1}次：${sec}秒`;
-        ul.appendChild(li);
-      });
-    }
-
-    initGame();
+    createBoard();
   </script>
 </body>
 </html>
